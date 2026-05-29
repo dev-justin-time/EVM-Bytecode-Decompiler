@@ -1,0 +1,288 @@
+
+
+
+    
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TokenMonster</title>
+    <link rel="stylesheet" href="styles.css">
+
+
+    <div class="container">
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5s.67 1.5 1.5 1.5zm3.5 6.5c2.03 0 3.8-1.11 4.75-2.75.19-.33-.05-.75-.44-.75H7.69c-.38 0-.63.42-.44.75.95 1.64 2.72 2.75 4.75 2.75z"></path>
+                </svg>
+                TokenMonster
+            </div>
+            <div class="nav-item active nav-tooltip" data-page="dashboard">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Dashboard
+                <span class="tooltip-text">Overview of trading activity and performance</span>
+            </div>
+            <div class="nav-item nav-tooltip" data-page="simulation">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Simulation
+                <span class="tooltip-text">Test trading strategies in a simulated environment</span>
+            </div>
+            <div class="nav-item nav-tooltip" data-page="history">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Trade History
+                <span class="tooltip-text">View complete history of trading activities</span>
+            </div>
+            <div class="nav-item nav-tooltip" data-page="settings">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573z"></path>
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Settings
+                <span class="tooltip-text">Configure bot parameters and preferences</span>
+            </div>
+        </nav>
+
+        <!-- Top bar with notifications and logout -->
+        <header class="topbar">
+            <div class="bot-status">
+                <div class="status-indicator stopped"></div>
+                <span>Bot Stopped</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div class="notification-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                    <span class="notification-badge" id="notificationCount">0</span>
+                    <div class="notifications-dropdown" id="notificationsDropdown">
+                        <!-- Notifications will be inserted here -->
+                    </div>
+                </div>
+                <div class="nav-item logout-item" style="margin: 0;" onclick="logout()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content area -->
+        <main class="main-content">
+            <div class="page-content active" id="dashboard" data-page="dashboard">
+                <!-- Bot Controls -->
+                <div class="bot-controls card">
+                    <h2>Bot Controls</h2>
+                    <div class="control-buttons">
+                        <button id="startBot" class="control-btn start" onclick="startBot()">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Start Bot
+                        </button>
+                        <button id="pauseBot" class="control-btn pause" onclick="pauseBot()" disabled="">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Pause Bot
+                        </button>
+                        <button id="stopBot" class="control-btn stop" onclick="stopBot()" disabled="">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
+                            Stop Bot
+                        </button>
+                        <button id="aiAuto" class="control-btn" onclick="toggleAIAuto()">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"></path>
+                            </svg>
+                            <span class="ai-auto-text">AI Auto: Off</span>
+                        </button>
+                    </div>
+                    <div class="bot-status-details">
+                        <div class="status-item">
+                            <label>Active Since</label>
+                            <span id="activeTime">Not Started</span>
+                        </div>
+                        <div class="status-item">
+                            <label>Today's Trades</label>
+                            <span id="todayTrades">0</span>
+                        </div>
+                        <div class="status-item">
+                            <label>Today's Profit/Loss</label>
+                            <span id="todayPnL">C$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Chart -->
+                <div class="trading-chart-card card">
+                    <h2>Live Trading Chart</h2>
+                    <canvas id="tradingChart"></canvas>
+                </div>
+
+                <!-- AI Market Predictions -->
+                <div class="predictions-card">
+                    <h2>AI Market Predictions</h2>
+                    <div class="chart-container">
+                        <canvas id="predictedOpportunitiesChart"></canvas>
+                    </div>
+                    <h3 style="margin-top: 1.5rem">Token Pair Recommendations</h3>
+                    <table class="arb-table">
+                        <thead>
+                            <tr>
+                                <th>Token Pair</th>
+                                <th>Confidence Score</th>
+                                <th>Expected Return</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recommendationsBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Recent Trade History -->
+                <div class="predictions-card">
+                    <h2>Recent Trade History</h2>
+                    <table class="trade-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Token Pair</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Price</th>
+                                <th>Buy DEX</th>
+                                <th>Sell DEX</th>
+                                <th>Status</th>
+                                <th>Gas Used</th>
+                                <th>Profit/Loss (CAD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardTradeHistory">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- AI Configuration -->
+                <div class="ai-settings-card">
+                    <h2>AI Configuration</h2>
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Auto Trading</label>
+                                    <span class="tooltip-text">Enable/disable automated trading based on AI predictions</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoTrading" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Risk Tolerance</label>
+                                    <span class="tooltip-text">Controls how aggressive the AI is in identifying and executing trades. Higher risk may yield higher returns but with increased exposure.</span>
+                                </div>
+                                <select class="risk-tolerance" onchange="updateAISettings()">
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced" selected="">Balanced</option>
+                                    <option value="aggressive">Aggressive</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Minimum Profit Threshold</label>
+                                    <span class="tooltip-text">Minimum profit percentage required before executing a trade. Higher thresholds mean fewer but potentially more profitable trades.</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="3" class="profit-slider" oninput="updateProfitThreshold(this.value)">
+                                <span id="profitValue">3%</span>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Automatic Token Pairing</label>
+                                    <span class="tooltip-text">AI automatically identifies and monitors profitable token pairs based on market conditions and historical data.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoPairing" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Market Trend Analysis</label>
+                                    <span class="tooltip-text">AI analyzes broader market trends to adjust strategy and timing of trades.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="marketAnalysis" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Trade Path Optimization</label>
+                                    <span class="tooltip-text">AI optimizes trading routes across multiple DEXs to maximize profits and minimize fees.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="pathOpt" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Slippage Prediction</label>
+                                    <span class="tooltip-text">AI predicts and accounts for price slippage to ensure accurate profit calculations.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="slippagePred" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Success Rate Prediction</label>
+                                    <span class="tooltip-text">AI estimates likelihood of successful trade execution based on historical data and current conditions.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="successRate" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Volatility Protection</label>
+                                    <span class="tooltip-text">AI adjusts trading parameters during high market volatility to protect against losses.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="volProtection" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="save-config-btn" onclick="saveAIConfig()">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                        </svg>
+                        Save AI Configuration
+                   </button></div></div></main>
+                   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/tooltipsy/dist/tooltipsy.min.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2/dist/sweetalert2.min.js"></script>
+                    <script src="script.js"></script>
+                </body>
+            </html>

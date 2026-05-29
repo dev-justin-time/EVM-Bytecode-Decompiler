@@ -1,0 +1,1593 @@
+<title>EVM Bytecode Decompiler & Trading Bot</title>
+<!-- Mermaid styles -->
+<link rel="stylesheet" href="mermaid.css">
+<style>
+:root {
+  --bg: #16161a;
+  --panel: #1f2330;
+  --muted: #9aa7d1;
+  --accent: #7aa2f7;
+  --success: #9ece6a;
+  --danger: #ff7b7b;
+  --glass: rgba(255,255,255,0.02);
+}
+
+html,body{height:100%}
+body {
+  background: var(--bg);
+  color: var(--muted);
+  font-family: 'Fira Code', monospace;
+  margin: 0;
+  padding: 18px;
+  min-height: 100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 18px;
+  font-weight:600;
+  letter-spacing:0.4px;
+}
+
+/* Navigation tabs */
+.app-nav {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.app-nav button {
+  background: var(--panel);
+  color: var(--muted);
+  border: 1px solid rgba(122,162,247,0.2);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.app-nav button:hover {
+  background: rgba(122,162,247,0.1);
+  border-color: var(--accent);
+}
+
+.app-nav button.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.app-section {
+  display: none;
+}
+
+.app-section.active {
+  display: block;
+}
+
+/* Trading Bot Styles */
+#tradingbot-section .container {
+  display: flex;
+  height: calc(100vh - 150px);
+  gap: 18px;
+}
+
+#tradingbot-section .sidebar {
+  width: 250px;
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.06);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+#tradingbot-section .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+#tradingbot-section .logo svg {
+  width: 32px;
+  height: 32px;
+}
+
+#tradingbot-section .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+  margin-bottom: 6px;
+  position: relative;
+}
+
+#tradingbot-section .nav-item:hover {
+  background: rgba(122,162,247,0.1);
+  color: var(--accent);
+}
+
+#tradingbot-section .nav-item.active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+#tradingbot-section .nav-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+#tradingbot-section .tooltip-text {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s;
+  margin-left: 12px;
+  z-index: 100;
+}
+
+#tradingbot-section .nav-tooltip:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+#tradingbot-section .main-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+#tradingbot-section .topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.06);
+  border-radius: 8px;
+  padding: 12px 18px;
+  margin-bottom: 18px;
+}
+
+#tradingbot-section .bot-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#tradingbot-section .status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff7b7b;
+}
+
+#tradingbot-section .status-indicator.running {
+  background: #9ece6a;
+  animation: pulse 2s infinite;
+}
+
+#tradingbot-section .status-indicator.paused {
+  background: #ffd580;
+}
+
+#tradingbot-section .status-indicator.stopped {
+  background: #ff7b7b;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+#tradingbot-section .notification-icon {
+  position: relative;
+  cursor: pointer;
+  padding: 8px;
+}
+
+#tradingbot-section .notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--danger);
+  color: var(--bg);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+#tradingbot-section .notifications-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.2);
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 300px;
+  display: none;
+  z-index: 1000;
+}
+
+#tradingbot-section .notifications-dropdown.show {
+  display: block;
+}
+
+#tradingbot-section .logout-item {
+  margin-left: 18px !important;
+}
+
+#tradingbot-section .card {
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.06);
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+#tradingbot-section .bot-controls h2,
+#tradingbot-section .trading-chart-card h2,
+#tradingbot-section .predictions-card h2,
+#tradingbot-section .ai-settings-card h2 {
+  color: var(--accent);
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+#tradingbot-section .control-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+#tradingbot-section .control-btn {
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.2);
+  color: var(--muted);
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+#tradingbot-section .control-btn:hover:not(:disabled) {
+  background: rgba(122,162,247,0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#tradingbot-section .control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#tradingbot-section .control-btn.start:hover:not(:disabled) {
+  background: rgba(158,206,106,0.2);
+  border-color: var(--success);
+}
+
+#tradingbot-section .control-btn.stop:hover:not(:disabled) {
+  background: rgba(255,123,123,0.2);
+  border-color: var(--danger);
+}
+
+#tradingbot-section .control-btn.ai-active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+#tradingbot-section .bot-status-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+#tradingbot-section .status-item {
+  background: rgba(255,255,255,0.02);
+  padding: 12px;
+  border-radius: 6px;
+}
+
+#tradingbot-section .status-item label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+#tradingbot-section .status-item span {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+#tradingbot-section .trading-chart-card {
+  min-height: 400px;
+}
+
+#tradingbot-section .chart-container {
+  min-height: 300px;
+  margin-bottom: 18px;
+}
+
+#tradingbot-section .arb-table,
+#tradingbot-section .trade-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#tradingbot-section .arb-table th,
+#tradingbot-section .trade-table th {
+  background: rgba(255,255,255,0.02);
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--accent);
+  border-bottom: 1px solid rgba(122,162,247,0.1);
+}
+
+#tradingbot-section .arb-table td,
+#tradingbot-section .trade-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(122,162,247,0.06);
+}
+
+#tradingbot-section .profit-positive {
+  color: var(--success);
+}
+
+#tradingbot-section .risk-low {
+  color: var(--success);
+}
+
+#tradingbot-section .risk-medium {
+  color: #ffd580;
+}
+
+#tradingbot-section .risk-high {
+  color: var(--danger);
+}
+
+#tradingbot-section .settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+#tradingbot-section .setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#tradingbot-section .setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 6px;
+}
+
+#tradingbot-section .setting-item .tooltip {
+  flex: 1;
+  position: relative;
+}
+
+#tradingbot-section .setting-item label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+#tradingbot-section .setting-item .tooltip-text {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s;
+  z-index: 100;
+  margin-bottom: 8px;
+}
+
+#tradingbot-section .setting-item .tooltip:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+#tradingbot-section .toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+#tradingbot-section .toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+#tradingbot-section .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.1);
+  transition: 0.3s;
+  border-radius: 26px;
+}
+
+#tradingbot-section .slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--muted);
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+#tradingbot-section input:checked + .slider {
+  background: var(--accent);
+}
+
+#tradingbot-section input:checked + .slider:before {
+  transform: translateX(24px);
+  background: var(--bg);
+}
+
+#tradingbot-section .risk-tolerance,
+#tradingbot-section select {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(122,162,247,0.2);
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#tradingbot-section .profit-slider {
+  width: 100px;
+  margin-right: 12px;
+}
+
+#tradingbot-section .save-config-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  transition: all 0.2s;
+}
+
+#tradingbot-section .save-config-btn:hover {
+  filter: brightness(1.05);
+}
+
+.decompiler {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+/* Panels and inputs */
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(122,162,247,0.06);
+  padding: 14px;
+  border-radius: 8px;
+}
+
+textarea, input[type="text"] {
+  background: #0f1220;
+  color: var(--muted);
+  border: 1px solid rgba(122,162,247,0.06);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'Fira Code', monospace;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+textarea { height: 320px; resize: vertical; }
+
+.controls {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin: 14px 0;
+}
+
+button {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 0 6px 6px 0;
+}
+
+button:hover { filter:brightness(1.05); transform:translateY(-2px); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>EVM Bytecode Decompiler & Trading Bot</h1>
+  
+  <div class="app-nav">
+    <button class="active" onclick="switchApp('decompiler')">Bytecode Decompiler</button>
+    <button onclick="switchApp('tradingbot')">Trading Bot</button>
+  </div>
+  
+  <div id="decompiler-section" class="app-section active">
+  <h2 style="color: var(--accent); text-align: center; margin-bottom: 18px;">EVM Bytecode Decompiler</h2>
+  <div class="decompiler">
+    <div class="panel">
+      <h3>Input Bytecode</h3>
+      <textarea id="bytecode" placeholder="Enter EVM bytecode here (hex format)..."></textarea>
+    </div>
+    
+    <div class="panel">
+      <h3>Contract Address</h3>
+      <input id="contractAddress" type="text" placeholder="Enter contract address...">
+      <div style="height:8px"></div>
+      <button id="getContractBytecode">Get Bytecode</button>
+    </div>
+    
+    <div class="panel">
+      <h3>Decompiled Output</h3>
+      <textarea id="output" readonly></textarea>
+    </div>
+    
+    <div class="controls">
+      <button id="decompileBtn">Decompile</button>
+      <button id="clearBtn">Clear</button>
+      <button id="connectWalletBtn">Connect Wallet</button>
+    </div>
+
+    <div class="workflow-panel">
+      <div class="mermaid-container panel">
+        <div id="mermaid" class="mermaid">
+%%{init: {"theme":"neutral","flowchart": {"curve":"basis"}}}%%
+flowchart TB
+    subgraph App["EVM Decompiler & Trading Bot"]
+        direction TB
+        A[User Opens Application] --> B{Select Tool}
+        B -->|Bytecode Decompiler| C[Decompiler Interface]
+        B -->|Trading Bot| D[Trading Bot Interface]
+        
+        subgraph Decompiler["Decompiler Workflow"]
+            C --> E[Input Bytecode]
+            E --> F[Decompile]
+            F --> G[Analyze Opcodes]
+            G --> H[Security Tests]
+            H --> I[Generate Report]
+        end
+        
+        subgraph TradingBot["Trading Bot Workflow"]
+            D --> J[Start Bot]
+            J --> K[AI Analysis]
+            K --> L[Execute Trades]
+            L --> M[Monitor Performance]
+            M --> N[Update History]
+            N --> K
+        end
+        
+        I --> O[View Results]
+        N --> O
+    end
+        </div>
+      </div>
+
+      <div class="mermaid-controls panel" aria-hidden="false">
+        <div class="stage" id="stage-1">1. Select Tool <button class="small" data-stage="1">►</button></div>
+        <div class="stage" id="stage-2">2. Decompiler Flow <button class="small" data-stage="2">►</button></div>
+        <div class="stage" id="stage-3">3. Trading Bot Flow <button class="small" data-stage="3">►</button></div>
+        <div class="stage" id="stage-4">4. View Results <button class="small" data-stage="4">►</button></div>
+        <div style="margin-top:auto; font-size:12px; color:var(--muted)">Use the stage buttons to highlight workflow steps.</div>
+      </div>
+    </div>
+
+    <div class="workflow-info">
+      <div class="panel" id="analysis"></div>
+      <div class="panel" id="contractInfo"></div>
+    </div>
+
+    <div class="panel" id="walletInfo"></div>
+
+    <div class="panel" id="blockchainFeatures">
+      <h3>Blockchain Features</h3>
+      <ul style="padding-left:18px; margin:0">
+        <li><input type="checkbox" id="featureTokenBurning"> Token Burning</li>
+        <li><input type="checkbox" id="featureTokenStaking"> Token Staking</li>
+        <li><input type="checkbox" id="featureNFTSupport"> NFT Support</li>
+        <li><input type="checkbox" id="featureMultiSigWallets"> Multi-Signature Wallets</li>
+        <li><input type="checkbox" id="featureYieldFarming"> Yield Farming</li>
+      </ul>
+    </div>
+
+    <div class="panel pentest" id="pentestSuite">
+      <h3 style="margin-top:0; color:#ffd580">Pentest Contract Suite</h3>
+      <div>
+        <button class="btn" id="simulateReentrancy">Simulate Reentrancy</button>
+        <button class="btn" id="simulateOverflow">Simulate Integer Overflow</button>
+        <button class="btn" id="simulateFrontRun">Simulate Front-running</button>
+        <button class="btn" id="simulateAccessBypass">Simulate Access Control Bypass</button>
+        <button class="btn" id="simulateTxOrdering">Simulate Tx-Ordering (Nonce/MEV)</button>
+      </div>
+      <div id="pentestResults" class="result" style="margin-top:10px; background:#0f1220; padding:10px; border-radius:6px; color:var(--muted)">No tests run yet.</div>
+    </div>
+
+  </div>
+  </div>
+  
+  <div id="tradingbot-section" class="app-section">
+    <h2 style="color: var(--accent); text-align: center; margin-bottom: 18px;">TokenMonster Trading Bot</h2>
+    
+    <div class="container">
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5s.67 1.5 1.5 1.5zm3.5 6.5c2.03 0 3.8-1.11 4.75-2.75.19-.33-.05-.75-.44-.75H7.69c-.38 0-.63.42-.44.75.95 1.64 2.72 2.75 4.75 2.75z"></path>
+                </svg>
+                TokenMonster
+            </div>
+            <div class="nav-item active nav-tooltip" data-page="dashboard">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Dashboard
+                <span class="tooltip-text">Overview of trading activity and performance</span>
+            </div>
+            <div class="nav-item nav-tooltip" data-page="simulation">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Simulation
+                <span class="tooltip-text">Test trading strategies in a simulated environment</span>
+            </div>
+            <div class="nav-item nav-tooltip" data-page="history">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Trade History
+                <span class="tooltip-text">View complete history of trading activities</span>
+            </div>
+            <div class="nav-item nav-tooltip" data-page="settings">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573z"></path>
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Settings
+                <span class="tooltip-text">Configure bot parameters and preferences</span>
+            </div>
+        </nav>
+
+        <!-- Top bar with notifications and logout -->
+        <header class="topbar">
+            <div class="bot-status">
+                <div class="status-indicator stopped"></div>
+                <span>Bot Stopped</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div class="notification-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                    <span class="notification-badge" id="notificationCount">0</span>
+                    <div class="notifications-dropdown" id="notificationsDropdown">
+                        <!-- Notifications will be inserted here -->
+                    </div>
+                </div>
+                <div class="nav-item logout-item" style="margin: 0;" onclick="logout()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content area -->
+        <main class="main-content">
+            <div class="page-content active" id="dashboard" data-page="dashboard">
+                <!-- Bot Controls -->
+                <div class="bot-controls card">
+                    <h2>Bot Controls</h2>
+                    <div class="control-buttons">
+                        <button id="startBot" class="control-btn start" onclick="startBot()">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Start Bot
+                        </button>
+                        <button id="pauseBot" class="control-btn pause" onclick="pauseBot()" disabled="">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Pause Bot
+                        </button>
+                        <button id="stopBot" class="control-btn stop" onclick="stopBot()" disabled="">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
+                            Stop Bot
+                        </button>
+                        <button id="aiAuto" class="control-btn" onclick="toggleAIAuto()">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"></path>
+                            </svg>
+                            <span class="ai-auto-text">AI Auto: Off</span>
+                        </button>
+                    </div>
+                    <div class="bot-status-details">
+                        <div class="status-item">
+                            <label>Active Since</label>
+                            <span id="activeTime">Not Started</span>
+                        </div>
+                        <div class="status-item">
+                            <label>Today's Trades</label>
+                            <span id="todayTrades">0</span>
+                        </div>
+                        <div class="status-item">
+                            <label>Today's Profit/Loss</label>
+                            <span id="todayPnL">C$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Chart -->
+                <div class="trading-chart-card card">
+                    <h2>Live Trading Chart</h2>
+                    <canvas id="tradingChart"></canvas>
+                </div>
+
+                <!-- AI Market Predictions -->
+                <div class="predictions-card">
+                    <h2>AI Market Predictions</h2>
+                    <div class="chart-container">
+                        <canvas id="predictedOpportunitiesChart"></canvas>
+                    </div>
+                    <h3 style="margin-top: 1.5rem">Token Pair Recommendations</h3>
+                    <table class="arb-table">
+                        <thead>
+                            <tr>
+                                <th>Token Pair</th>
+                                <th>Confidence Score</th>
+                                <th>Expected Return</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recommendationsBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Recent Trade History -->
+                <div class="predictions-card">
+                    <h2>Recent Trade History</h2>
+                    <table class="trade-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Token Pair</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Price</th>
+                                <th>Buy DEX</th>
+                                <th>Sell DEX</th>
+                                <th>Status</th>
+                                <th>Gas Used</th>
+                                <th>Profit/Loss (CAD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardTradeHistory">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- AI Configuration -->
+                <div class="ai-settings-card">
+                    <h2>AI Configuration</h2>
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Auto Trading</label>
+                                    <span class="tooltip-text">Enable/disable automated trading based on AI predictions</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoTrading" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Risk Tolerance</label>
+                                    <span class="tooltip-text">Controls how aggressive the AI is in identifying and executing trades. Higher risk may yield higher returns but with increased exposure.</span>
+                                </div>
+                                <select class="risk-tolerance" onchange="updateAISettings()">
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced" selected="">Balanced</option>
+                                    <option value="aggressive">Aggressive</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Minimum Profit Threshold</label>
+                                    <span class="tooltip-text">Minimum profit percentage required before executing a trade. Higher thresholds mean fewer but potentially more profitable trades.</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="3" class="profit-slider" oninput="updateProfitThreshold(this.value)">
+                                <span id="profitValue">3%</span>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Automatic Token Pairing</label>
+                                    <span class="tooltip-text">AI automatically identifies and monitors profitable token pairs based on market conditions and historical data.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoPairing" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Market Trend Analysis</label>
+                                    <span class="tooltip-text">AI analyzes broader market trends to adjust strategy and timing of trades.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="marketAnalysis" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Trade Path Optimization</label>
+                                    <span class="tooltip-text">AI optimizes trading routes across multiple DEXs to maximize profits and minimize fees.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="pathOpt" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Slippage Prediction</label>
+                                    <span class="tooltip-text">AI predicts and accounts for price slippage to ensure accurate profit calculations.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="slippagePred" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Success Rate Prediction</label>
+                                    <span class="tooltip-text">AI estimates likelihood of successful trade execution based on historical data and current conditions.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="successRate" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="tooltip">
+                                    <label>Volatility Protection</label>
+                                    <span class="tooltip-text">AI adjusts trading parameters during high market volatility to protect against losses.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="volProtection" checked="" onchange="updateAISettings()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="save-config-btn" onclick="saveAIConfig()">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                        </svg>
+                        Save AI Configuration
+                   </button></div></div></main>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="notificationSystem.js"></script>
+<script src="chartUtils.js"></script>
+<script src="botControls.js"></script>
+<script src="main.js"></script>
+<script src="simulation.js"></script>
+<script src="tradeHistory.js"></script>
+<script src="settings.js"></script>
+<script>
+// Tab switching functionality
+function switchApp(appName) {
+  // Hide all sections
+  document.querySelectorAll('.app-section').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  // Remove active class from all nav buttons
+  document.querySelectorAll('.app-nav button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show selected section
+  document.getElementById(`${appName}-section`).classList.add('active');
+  
+  // Add active class to clicked button
+  event.target.classList.add('active');
+}
+
+/* Keep core logic but add hooks to update mermaid node highlighting based on 'stage' */
+const opcodeDefinitions = {
+  'STOP': 'Halts execution',
+  'ADD': 'Addition operation',
+  'MUL': 'Multiplication operation',
+  'SUB': 'Subtraction operation',
+  'DIV': 'Integer division operation',
+  'SDIV': 'Signed integer division operation',
+  'MOD': 'Modulo remainder operation',
+  'SMOD': 'Signed modulo operation',
+  'ADDMOD': 'Modulo addition operation',
+  'MULMOD': 'Modulo multiplication operation',
+  'EXP': 'Exponential operation',
+  'SIGNEXTEND': 'Extend length of two\'s complement signed integer',
+  'LT': 'Less-than comparison',
+  'GT': 'Greater-than comparison',
+  'SLT': 'Signed less-than comparison',
+  'SGT': 'Signed greater-than comparison',
+  'EQ': 'Equality comparison',
+  'ISZERO': 'Simple not operator',
+  'AND': 'Bitwise AND operation',
+  'OR': 'Bitwise OR operation',
+  'XOR': 'Bitwise XOR operation',
+  'NOT': 'Bitwise NOT operation',
+  'BYTE': 'Retrieve single byte from word',
+  'SHA3': 'Compute Keccak-256 hash',
+  'ADDRESS': 'Get address of currently executing account',
+  'BALANCE': 'Get balance of the given account',
+  'ORIGIN': 'Get execution origination address',
+  'CALLER': 'Get caller address',
+  'CALLVALUE': 'Get deposited value by the instruction/transaction responsible for this execution',
+  'CALLDATALOAD': 'Get input data of current environment',
+  'CALLDATASIZE': 'Get size of input data in current environment',
+  'CALLDATACOPY': 'Copy input data in current environment to memory',
+  'CODESIZE': 'Get size of code running in current environment',
+  'CODECOPY': 'Copy code running in current environment to memory',
+  'GASPRICE': 'Get price of gas in current environment',
+  'EXTCODESIZE': 'Get size of an account\'s code',
+  'EXTCODECOPY': 'Copy an account\'s code to memory',
+  'BLOCKHASH': 'Get the hash of one of the 256 most recent complete blocks',
+  'COINBASE': 'Get the block\'s beneficiary address',
+  'TIMESTAMP': 'Get the block\'s timestamp',
+  'NUMBER': 'Get the block\'s number',
+  'DIFFICULTY': 'Get the block\'s difficulty',
+  'GASLIMIT': 'Get the block\'s gas limit',
+  'POP': 'Remove item from stack',
+  'MLOAD': 'Load word from memory',
+  'MSTORE': 'Save word to memory',
+  'MSTORE8': 'Save byte to memory',
+  'SLOAD': 'Load word from storage',
+  'SSTORE': 'Save word to storage',
+  'JUMP': 'Alter the program counter',
+  'JUMPI': 'Conditionally alter the program counter',
+  'PC': 'Get the program counter',
+  'MSIZE': 'Get the size of active memory',
+  'GAS': 'Get the amount of available gas',
+  'JUMPDEST': 'Mark a valid jump destination',
+  'PUSH1': 'Place 1 byte item on stack',
+  'PUSH2': 'Place 2 byte item on stack',
+  'PUSH3': 'Place 3 byte item on stack',
+  'PUSH4': 'Place 4 byte item on stack',
+  'CREATE': 'Create a new account with associated code',
+  'CALL': 'Message-call into an account',
+  'CALLCODE': 'Message-call into this account with alternative account\'s code',
+  'RETURN': 'Halt execution returning output data',
+  'DELEGATECALL': 'Message-call into this account with an alternative account\'s code, but persisting the current values for sender and value',
+  'CREATE2': 'Create a new account with associated code at a predictable address',
+  'REVERT': 'Halt execution reverting state changes',
+  'INVALID': 'Designated invalid instruction',
+  'SELFDESTRUCT': 'Halt execution and register account for deletion'
+};
+
+const opcodes = {
+  '00': 'STOP',
+  '01': 'ADD',
+  '02': 'MUL',
+  '03': 'SUB',
+  '04': 'DIV',
+  '05': 'SDIV',
+  '06': 'MOD',
+  '07': 'SMOD',
+  '08': 'ADDMOD',
+  '09': 'MULMOD',
+  '0a': 'EXP',
+  '0b': 'SIGNEXTEND',
+  '10': 'LT',
+  '11': 'GT',
+  '12': 'SLT',
+  '13': 'SGT',
+  '14': 'EQ',
+  '15': 'ISZERO',
+  '16': 'AND',
+  '17': 'OR',
+  '18': 'XOR',
+  '19': 'NOT',
+  '1a': 'BYTE',
+  '20': 'SHA3',
+  '30': 'ADDRESS',
+  '31': 'BALANCE',
+  '32': 'ORIGIN',
+  '33': 'CALLER',
+  '34': 'CALLVALUE',
+  '35': 'CALLDATALOAD',
+  '36': 'CALLDATASIZE',
+  '37': 'CALLDATACOPY',
+  '38': 'CODESIZE',
+  '39': 'CODECOPY',
+  '3a': 'GASPRICE',
+  '3b': 'EXTCODESIZE',
+  '3c': 'EXTCODECOPY',
+  '40': 'BLOCKHASH',
+  '41': 'COINBASE',
+  '42': 'TIMESTAMP',
+  '43': 'NUMBER',
+  '44': 'DIFFICULTY',
+  '45': 'GASLIMIT',
+  '50': 'POP',
+  '51': 'MLOAD',
+  '52': 'MSTORE',
+  '53': 'MSTORE8',
+  '54': 'SLOAD',
+  '55': 'SSTORE',
+  '56': 'JUMP',
+  '57': 'JUMPI',
+  '58': 'PC',
+  '59': 'MSIZE',
+  '5a': 'GAS',
+  '5b': 'JUMPDEST',
+  '60': 'PUSH1',
+  '61': 'PUSH2',
+  '62': 'PUSH3',
+  '63': 'PUSH4',
+  'f0': 'CREATE',
+  'f1': 'CALL',
+  'f2': 'CALLCODE',
+  'f3': 'RETURN',
+  'f4': 'DELEGATECALL',
+  'f5': 'CREATE2',
+  'fd': 'REVERT',
+  'fe': 'INVALID',
+  'ff': 'SELFDESTRUCT'
+};
+
+let walletConnected = false;
+let walletAddress = '';
+
+async function connectWallet() {
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      walletAddress = accounts[0];
+      walletConnected = true;
+      document.getElementById('walletInfo').innerHTML = `Wallet connected: ${walletAddress}`;
+    } catch (error) {
+      console.error(error);
+    }
+  } else {
+    alert('Please install MetaMask or another Ethereum wallet');
+  }
+}
+
+function logConnection(walletAddress, contractAddress) {
+  const logData = `${walletAddress},${contractAddress},${new Date().toISOString()}\n`;
+  const logFile = new Blob([logData], { type: 'text/csv' });
+  const logLink = document.createElement('a');
+  logLink.href = URL.createObjectURL(logFile);
+  logLink.download = 'connections.csv';
+  logLink.click();
+}
+
+function logBannedWallet(walletAddress) {
+  const logData = `${walletAddress},${new Date().toISOString()}\n`;
+  const logFile = new Blob([logData], { type: 'text/csv' });
+  const logLink = document.createElement('a');
+  logLink.href = URL.createObjectURL(logFile);
+  logLink.download = 'banned-wallets.csv';
+  logLink.click();
+}
+
+async function checkPublicRecords(contractAddress, walletAddress) {
+  const response = await fetch(`https://api.etherscan.io/api?module=contract&action=getabi&address=${contractAddress}&apikey=YOUR_API_KEY`);
+  const data = await response.json();
+  if (data.status === '1') {
+    const contractABI = JSON.parse(data.result);
+    // Check if contract is blacklisted
+    if (contractABI.blacklisted) {
+      alert('Contract is blacklisted');
+    }
+  }
+
+  const response2 = await fetch(`https://api.etherscan.io/api?module=account&action=gettxlist&address=${walletAddress}&startblock=0&endblock=99999999&sort=asc&apikey=YOUR_API_KEY`);
+  const data2 = await response2.json();
+  if (data2.status === '1') {
+    const transactions = data2.result;
+    // Check if wallet is blacklisted
+    transactions.forEach((tx) => {
+      if (tx.to === contractAddress && tx.value > 0) {
+        alert('Wallet is blacklisted');
+      }
+    });
+  }
+}
+
+async function getContractBytecode(address) {
+    const provider = new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"); // Replace with your Infura Project ID
+    const web3 = new Web3(provider);
+    try {
+        const bytecode = await web3.eth.getCode(address);
+        return bytecode;
+    } catch (error) {
+        console.error("Error fetching bytecode:", error);
+        return null;
+    }
+}
+
+function analyzeContract(bytecode) {
+  const contractInfo = {
+    type: 'Unknown',
+    features: [],
+    security: []
+  };
+
+  // Detect contract type
+  if (bytecode.includes('60806040')) {
+    contractInfo.type = 'Solidity Contract (>0.4.22)';
+  }
+
+  // Clean up feature detection
+  if (bytecode.includes('60806040')) {
+    contractInfo.features.push('Constructor Present');
+  }
+  if (bytecode.includes('5b')) {
+    contractInfo.features.push('Has Jump Destinations');
+  }
+  if (bytecode.includes('f3')) {
+    contractInfo.features.push('Returns Data');
+  }
+  if (bytecode.includes('fd')) {
+    contractInfo.features.push('Can Revert');
+  }
+  
+  // Clean up security analysis
+  if (bytecode.includes('33')) {
+    contractInfo.security.push('Uses msg.sender');
+  }
+  if (bytecode.includes('54')) {
+    contractInfo.security.push('Reads from Storage');
+  }
+  if (bytecode.includes('55')) {
+    contractInfo.security.push('Writes to Storage');
+  }
+  if (bytecode.includes('ff')) {
+    contractInfo.security.push('Can Self Destruct');
+  }
+
+  return contractInfo;
+}
+
+/* ---------- Decompiler ---------- */
+async function decompile() {
+  const bytecodeInput = document.getElementById('bytecode').value.trim();
+  const contractAddress = document.getElementById('contractAddress').value.trim();
+  const output = document.getElementById('output');
+  const error = document.getElementById('error');
+  const analysis = document.getElementById('analysis');
+  const contractInfoDiv = document.getElementById('contractInfo');
+  const loading = document.querySelector('.loading');
+  
+  if (error) { error.style.display = 'none'; }
+  if (loading) { loading.style.display = 'block'; }
+  
+  try {
+    if (!bytecodeInput.match(/^(0x)?[0-9a-fA-F]+$/)) {
+      throw new Error('Invalid bytecode format. Please enter valid hexadecimal.');
+    }
+    
+    let bytecode = bytecodeInput.replace('0x', '');
+    let decompiled = [];
+    let i = 0;
+    
+    while (i < bytecode.length) {
+      const opcode = bytecode.slice(i, i+2).toLowerCase();
+      if (!opcode) break;
+      if (opcodes[opcode]) {
+        if (opcode >= '60' && opcode <= '7f') {
+          const pushSize = parseInt(opcode, 16) - 0x5f;
+          const dataStart = i + 2;
+          const dataEnd = dataStart + (pushSize * 2);
+          const pushData = bytecode.slice(dataStart, dataEnd);
+          const instruction = `${opcodes[opcode]} 0x${pushData}`;
+          const definition = opcodeDefinitions[opcodes[opcode]] || 'No definition available';
+          decompiled.push(`${instruction}\n    // ${definition}`);
+          i = dataEnd;
+        } else {
+          const instruction = opcodes[opcode];
+          const definition = opcodeDefinitions[instruction] || 'No definition available';
+          decompiled.push(`${instruction}\n    // ${definition}`);
+          i += 2;
+        }
+      } else {
+        decompiled.push(`UNKNOWN (${opcode})\n    // Undefined operation`);
+        i += 2;
+      }
+    }
+    
+    output.value = decompiled.join('\n');
+    
+    const opcodeCount = {};
+    decompiled.forEach(line => {
+      const opcode = line.split('\n')[0].split(' ')[0];
+      opcodeCount[opcode] = (opcodeCount[opcode] || 0) + 1;
+    });
+
+    const contractInfo = analyzeContract(bytecode);
+    
+    analysis.innerHTML = `
+      <h3 style="margin-top:0;color:var(--accent)">Bytecode Analysis</h3>
+      <p>Total Length: ${bytecode.length/2} bytes</p>
+      <p>Instruction Count: ${decompiled.length}</p>
+      <p>Most Common Operations:</p>
+      <ul>
+        ${Object.entries(opcodeCount)
+          .sort((a,b) => b[1] - a[1])
+          .slice(0,5)
+          .map(([op, count]) => `<li>${op}: ${count} times</li>`)
+          .join('')}
+      </ul>`;
+
+    contractInfoDiv.innerHTML = `
+      <h3 style="margin-top:0;color:var(--accent)">Contract Information</h3>
+      <p>Contract Type: ${contractInfo.type}</p>
+      <h4>Features Detected:</h4>
+      <ul>
+        ${contractInfo.features.map(f => `<li>${f}</li>`).join('')}
+      </ul>
+      <h4>Security Analysis:</h4>
+      <ul>
+        ${contractInfo.security.map(s => `<li>${s}</li>`).join('')}
+      </ul>`;
+    
+    if (walletConnected) {
+      logConnection(walletAddress, contractAddress);
+      await checkPublicRecords(contractAddress, walletAddress);
+    }
+    
+  } catch (err) {
+    const errEl = document.getElementById('error');
+    if (errEl) { errEl.textContent = err.message; errEl.style.display = 'block'; }
+    output.value = '';
+    const analysisEl = document.getElementById('analysis');
+    if (analysisEl) analysisEl.innerHTML = '';
+    const contractInfoDiv = document.getElementById('contractInfo');
+    if (contractInfoDiv) contractInfoDiv.innerHTML = '';
+  }
+  
+  const loadingEl = document.querySelector('.loading');
+  if (loadingEl) loadingEl.style.display = 'none';
+}
+
+/* Add missing clearFields function to avoid ReferenceError from Clear button */
+function clearFields() {
+  document.getElementById('bytecode').value = '';
+  document.getElementById('contractAddress').value = '';
+  document.getElementById('output').value = '';
+  const err = document.getElementById('error');
+  if (err) { err.textContent = ''; err.style.display = 'none'; }
+  document.getElementById('analysis').innerHTML = '';
+  document.getElementById('contractInfo').innerHTML = '';
+  document.getElementById('walletInfo').innerHTML = '';
+  document.getElementById('pentestResults').innerHTML = 'No tests run yet.';
+}
+
+/* ---------- Pentest Suite Simulators (unchanged) ---------- */
+function reportPentest(message) {
+  const el = document.getElementById('pentestResults');
+  const ts = new Date().toISOString();
+  el.innerHTML = `<strong>[${ts}]</strong> ${message}`;
+}
+function simulateReentrancy(bytecodeHex) {
+  const b = bytecodeHex.replace(/^0x/, '').toLowerCase();
+  const hasCall = b.includes('f1');
+  const writesStorage = b.includes('55');
+  const hasRevert = b.includes('fd') || b.includes('f3');
+  if (hasCall && writesStorage && !hasRevert) {
+    return 'HIGH: Reentrancy pattern likely (external CALL + storage write without revert).';
+  } else if (hasCall && writesStorage && hasRevert) {
+    return 'MEDIUM: CALL + storage writes present but revert/return found — check ordering.';
+  } else if (hasCall) {
+    return 'LOW: External calls present; review call order and state changes.';
+  }
+  return 'NONE: No obvious reentrancy indicators found.';
+}
+function simulateIntegerOverflow(bytecodeHex) {
+  const b = bytecodeHex.replace(/^0x/, '').toLowerCase();
+  const hasAdd = b.includes('01');
+  const hasMul = b.includes('02');
+  const hasCheck = b.includes('15') || b.includes('14');
+  if ((hasAdd || hasMul) && !hasCheck) {
+    return 'MEDIUM: Arithmetic ops found without obvious equality/zero checks — risk of overflow.';
+  }
+  return 'LOW: No immediate overflow indicators.';
+}
+function simulateFrontRunning(bytecodeHex) {
+  const b = bytecodeHex.replace(/^0x/, '').toLowerCase();
+  const usesTimestamp = b.includes('42');
+  const usesNumber = b.includes('43');
+  const usesBlockhash = b.includes('40');
+  if (usesTimestamp || usesNumber || usesBlockhash) {
+    return 'HIGH: Time/block-dependent logic detected — potential front-running or miner manipulation.';
+  }
+  return 'LOW: No time-dependent opcodes detected.';
+}
+function simulateAccessControl(bytecodeHex) {
+  const b = bytecodeHex.replace(/^0x/, '').toLowerCase();
+  const usesCaller = b.includes('33');
+  const usesOrigin = b.includes('32');
+  const writesStorage = b.includes('55');
+  if (usesOrigin) {
+    return 'HIGH: ORIGIN used — vulnerable to tx.origin phishing attacks (avoid using tx.origin for auth).';
+  }
+  if (usesCaller && writesStorage) {
+    return 'MEDIUM: CALLER and storage writes detected — verify role checks and modifiers.';
+  }
+  if (!usesCaller && writesStorage) {
+    return 'MEDIUM: Storage writes without CALLER checks — potential lack of access control.';
+  }
+  return 'LOW: Access-control patterns not flagged by heuristics.';
+}
+function simulateTxOrdering(bytecodeHex) {
+  const b = bytecodeHex.replace(/^0x/, '').toLowerCase();
+  const hasBalance = b.includes('31');
+  const hasCallValue = b.includes('34');
+  const hasSstore = b.includes('55');
+  if (hasBalance && hasCallValue && hasSstore) {
+    return 'HIGH: Balance/callvalue/storage ops detected — review for frontrunnable/MEV-sensitive flows.';
+  }
+  return 'LOW: No clear tx-ordering risk indicators.';
+}
+function runPentest(testName) {
+  const bytecode = document.getElementById('bytecode').value || '';
+  if (!bytecode.match(/^(0x)?[0-9a-fA-F]+$/)) {
+    reportPentest('Invalid or empty bytecode — cannot run pentest.');
+    return;
+  }
+  let result = '';
+  switch (testName) {
+    case 'reentrancy': result = simulateReentrancy(bytecode); break;
+    case 'overflow': result = simulateIntegerOverflow(bytecode); break;
+    case 'frontrun': result = simulateFrontRunning(bytecode); break;
+    case 'access': result = simulateAccessControl(bytecode); break;
+    case 'txordering': result = simulateTxOrdering(bytecode); break;
+    default: result = 'Unknown test.';
+  }
+  reportPentest(`${testName.toUpperCase()}: ${result}`);
+}
+
+/* ---------- Wiring & Mermaid stage logic ---------- */
+document.getElementById('decompileBtn').addEventListener('click', decompile);
+document.getElementById('clearBtn').addEventListener('click', clearFields);
+document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
+document.getElementById('getContractBytecode').addEventListener('click', async () => {
+    const contractAddressInput = document.getElementById('contractAddress');
+    const address = contractAddressInput.value.trim();
+    if (!address) {
+        alert("Please enter a contract address.");
+        return;
+    }
+    const bytecode = await getContractBytecode(address);
+    if (bytecode) {
+        document.getElementById('bytecode').value = bytecode;
+    } else {
+      alert("Could not retrieve bytecode for the provided address.");
+    }
+});
+
+document.getElementById('simulateReentrancy').addEventListener('click', () => runPentest('reentrancy'));
+document.getElementById('simulateOverflow').addEventListener('click', () => runPentest('overflow'));
+document.getElementById('simulateFrontRun').addEventListener('click', () => runPentest('frontrun'));
+document.getElementById('simulateAccessBypass').addEventListener('click', () => runPentest('access'));
+document.getElementById('simulateTxOrdering').addEventListener('click', () => runPentest('txordering'));
+
+// Set initial example bytecode
+document.getElementById('bytecode').value = '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c80632e64cec114610030575b600080fd5b61003861004e565b604051610045919061009d565b60405180910390f35b60008054905090565b6000819050919050565b61006d81610059565b82525050565b60006020820190506100886000830184610064565b92915050565b600082825260208201905092915050565b50565b60006100b4600083610087565b91506100bf82610098565b600082019050919050565b60006100d5826100a7565b915081905091905056fea2646970667358221220c019a96cf2b0';
+
+</script>
+
+<!-- External converter integration: embedded iframe and helper to send bytecode to the external converter -->
+<script>
+  (function(){
+    const externalUrl = 'https://websim.com/@JUSTIN_TIME/solidity-evm-to-risc-v-converter';
+    // create a hidden iframe to host the external converter page
+    const iframe = document.createElement('iframe');
+    iframe.src = externalUrl;
+    iframe.style.position = 'fixed';
+    iframe.style.right = '12px';
+    iframe.style.bottom = '12px';
+    iframe.style.width = '360px';
+    iframe.style.height = '420px';
+    iframe.style.border = '1px solid rgba(255,255,255,0.06)';
+    iframe.style.borderRadius = '8px';
+    iframe.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
+    iframe.style.zIndex = '9999';
+    iframe.style.background = '#0f1220';
+    iframe.style.display = 'none'; // start hidden
+    iframe.id = 'externalConverterFrame';
+    // sandbox minimally but allow scripts and forms so the tool can run inside iframe
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+    document.body.appendChild(iframe);
+
+    // create a toggle button to show/hide the iframe and to send current bytecode into it
+    const toggleBtn = document.createElement('button');
+    toggleBtn.textContent = 'EVM→RISC-V Converter';
+    toggleBtn.style.position = 'fixed';
+    toggleBtn.style.right = '12px';
+    toggleBtn.style.bottom = '444px';
+    toggleBtn.style.zIndex = '10000';
+    toggleBtn.style.padding = '10px 12px';
+    toggleBtn.style.borderRadius = '8px';
+    toggleBtn.style.background = 'linear-gradient(90deg, #7aa2f7, #9ece6a)';
+    toggleBtn.style.color = '#0f1220';
+    toggleBtn.style.border = 'none';
+    toggleBtn.style.cursor = 'pointer';
+    toggleBtn.style.boxShadow = '0 6px 18px rgba(122,162,247,0.06)';
+    document.body.appendChild(toggleBtn);
+
+    // When user clicks toggle, show the iframe and send the current bytecode via postMessage
+    toggleBtn.addEventListener('click', () => {
+      const frame = document.getElementById('externalConverterFrame');
+      if (!frame) return;
+      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+      if (frame.style.display === 'block') {
+        // send current bytecode to iframe (best-effort; target must implement message listener)
+        const bytecode = document.getElementById('bytecode') ? document.getElementById('bytecode').value : '';
+        try {
+          frame.contentWindow.postMessage({ type: 'LOAD_BYTECODE', payload: { bytecode } }, '*');
+        } catch (e) {
+          console.warn('Could not postMessage to external converter iframe', e);
+        }
+      }
+    });
+
+    // Listener to accept messages from iframe (e.g., converted result) and show them in output
+    window.addEventListener('message', (ev) => {
+      if (!ev.data) return;
+      if (ev.data.type === 'CONVERSION_RESULT') {
+        const result = ev.data.payload || '';
+        // show result in a new modal-like panel at bottom
+        let existing = document.getElementById('converterResultPanel');
+        if (!existing) {
+          existing = document.createElement('div');
+          existing.id = 'converterResultPanel';
+          existing.style.position = 'fixed';
+          existing.style.left = '12px';
+          existing.style.right = '12px';
+          existing.style.bottom = '12px';
+          existing.style.maxHeight = '40vh';
+          existing.style.overflow = 'auto';
+          existing.style.background = '#0b0d14';
+          existing.style.border = '1px solid rgba(122,162,247,0.06)';
+          existing.style.padding = '12px';
+          existing.style.borderRadius = '8px';
+          existing.style.zIndex = '10001';
+          existing.style.color = 'var(--muted)';
+          document.body.appendChild(existing);
+        }
+        existing.innerHTML = '<strong style="color:var(--accent)">Converter Output</strong><pre style="white-space:pre-wrap; margin-top:8px; font-family:monospace; font-size:12px;">' + escapeHtml(result) + '</pre>';
+        setTimeout(()=> { existing.style.opacity = '1'; }, 10);
+      }
+    });
+
+    // small helper to escape HTML for safe insertion
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    // expose a helper to send bytecode programmatically
+    window.sendBytecodeToExternalConverter = function(bytecode) {
+      const frame = document.getElementById('externalConverterFrame');
+      if (!frame) return;
+      frame.style.display = 'block';
+      try {
+        frame.contentWindow.postMessage({ type: 'LOAD_BYTECODE', payload: { bytecode } }, '*');
+      } catch(e) {
+        console.warn('Failed to send bytecode to converter iframe', e);
+      }
+    };
+
+    // If external converter origin supports postMessage, we provide a dedicated button in the UI (pentest suite)
+    try {
+      const pentestDiv = document.getElementById('pentestSuite');
+      if (pentestDiv) {
+        const sendBtn = document.createElement('button');
+        sendBtn.textContent = 'Send Bytecode to Converter';
+        sendBtn.className = 'btn';
+        sendBtn.style.marginLeft = '8px';
+        sendBtn.addEventListener('click', () => {
+          const bytecode = document.getElementById('bytecode') ? document.getElementById('bytecode').value : '';
+          if (!bytecode.match(/^(0x)?[0-9a-fA-F]+$/)) {
+            reportPentest('Invalid or empty bytecode — cannot send to converter.');
+            return;
+          }
+          window.sendBytecodeToExternalConverter(bytecode);
+        });
+        pentestDiv.appendChild(sendBtn);
+      }
+    } catch(e) {
+      console.warn(e);
+    }
+   })();
+ </script>
+ <!-- Mermaid module script -->
+ <script type="module" src="mermaid.js"></script>
+ </body>
+</html>
